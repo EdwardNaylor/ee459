@@ -17,17 +17,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
-
-void lcd_init(void);
-void lcd_out(int, unsigned char *);
-void sci_init(void);
-void sci_out(unsigned char);
-void sci_outs(unsigned char *);
-
-unsigned char str1[] = "1234567890";
-unsigned char str2[] = ">> USC EE459L <<";
-unsigned char str3[] = ">> at328-6.c <<<";
-unsigned char str4[] = "-- April 11, 2011 --";
+#include "LCD.h"
 
 /*
 	First line:		0-19
@@ -38,26 +28,26 @@ unsigned char str4[] = "-- April 11, 2011 --";
 	Fourth line doesnt seem to work well
 */
 
-#define FOSC 7372800			// Clock frequency 7372800
-#define BAUD 9600              // Baud rate used by the LCD 104ns
-#define MYUBRR FOSC/16/BAUD-1   // Value for UBRR0 register
+// #define FOSC 7372800			// Clock frequency 7372800
+// #define BAUD 9600              // Baud rate used by the LCD 104ns
+// #define MYUBRR FOSC/16/BAUD-1   // Value for UBRR0 register
 
-int main(void) {
-
-	sci_init();						// Initialize the SCI port
-
-	lcd_init();						// Initialize the LCD
-
-	lcd_out(55, (unsigned char *) str1);				// Print string on line 1
-	//lcd_out(2, 1, (unsigned char *) str2);		// Print string on line 2
-	//lcd_out(3, 1, (unsigned char *) str3);		// Print string on line 3
-	//lcd_out(4, 1, (unsigned char *) str4);		// Print string on line 4
-
-	while (1) {               // Loop forever
-	}
-
-	return 0;   /* never reached */
-}
+// int main(void) {
+//
+// 	sci_init();						// Initialize the SCI port
+//
+// 	lcd_init();						// Initialize the LCD
+//
+// 	lcd_out(55, (unsigned char *) str1);				// Print string on line 1
+// 	//lcd_out(2, 1, (unsigned char *) str2);		// Print string on line 2
+// 	//lcd_out(3, 1, (unsigned char *) str3);		// Print string on line 3
+// 	//lcd_out(4, 1, (unsigned char *) str4);		// Print string on line 4
+//
+// 	while (1) {               // Loop forever
+// 	}
+//
+// 	return 0;   /* never reached */
+// }
 
 /*
   lcd_init - Initialize the LCD
@@ -93,7 +83,7 @@ void sci_init(void) {
 	UBRR0 = MYUBRR;				// Set baud rate
 	UCSR0B |= (1 << TXEN0);		// Turn on transmitter
 	UCSR0B |= (1 << TXEN0);		// Turn on recv
-	UCSR0C = (3 << UCSZ00);		// Set for asynchronous operation, no parity, 
+	UCSR0C = (3 << UCSZ00);		// Set for asynchronous operation, no parity,
 										// one stop bit, 8 data bits
 }
 

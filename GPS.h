@@ -1,10 +1,6 @@
 #ifndef GPS_h
 #define GPS_h
 
-// #include <SoftwareSerial.h>
-//
-// SoftwareSerial nss(26, 255);
-
 typedef int bool;
 #define false 0
 #define true 1

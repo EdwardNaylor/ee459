@@ -1,5 +1,6 @@
 #include "GPS.h"
 #include "Timer.h"
+#include "Serial.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <math.h>

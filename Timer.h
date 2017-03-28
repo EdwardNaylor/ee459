@@ -1,5 +1,5 @@
-#ifndef LCD_h
-#define LCD_h
+#ifndef Timer_h
+#define Timer_h
 
 #define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 #define clockCyclesToMicroseconds(a) ( ((a) * 1000L) / (F_CPU / 1000L) )

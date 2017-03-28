@@ -9,6 +9,8 @@ typedef int bool;
 #define false 0
 #define true 1
 
+typedef unsigned char byte;
+
 enum {_GPS_SENTENCE_GPGGA, _GPS_SENTENCE_GPRMC, _GPS_SENTENCE_OTHER};
 
 #define _GPRMC_TERM   "GPRMC"
@@ -19,6 +21,9 @@ enum {_GPS_SENTENCE_GPGGA, _GPS_SENTENCE_GPRMC, _GPS_SENTENCE_OTHER};
 #define _GPS_KMPH_PER_KNOT 1.852
 #define _GPS_MILES_PER_METER 0.00062137112
 #define _GPS_KM_PER_METER 0.001
+
+enum {GPS_INVALID_AGE = 0xFFFFFFFF, GPS_INVALID_ANGLE = 999999999, GPS_INVALID_ALTITUDE = 999999999, GPS_INVALID_DATE = 0,
+  GPS_INVALID_TIME = 0xFFFFFFFF, GPS_INVALID_SPEED = 999999999, GPS_INVALID_FIX_TIME = 0xFFFFFFFF};
 
 // properties
 unsigned long _time, _new_time;
@@ -48,7 +53,7 @@ void gpsdump();
 // Feed data as it becomes available
 bool feedgps();
 float distance_between(float lat1, float long1, float lat2, float long2);
-void get_position();
+void get_position(long *latitude, long *longitude, unsigned long *fix_age);
 
 //internal utilities
 int from_hex(char a);

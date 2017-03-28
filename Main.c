@@ -3,6 +3,7 @@
 #include "Timer.h"
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 // unsigned char str1[] = "1234567890";
 // unsigned char str2[] = ">> USC EE459L <<";
@@ -17,7 +18,7 @@ int main(void) {
 	//lcd_out(55, (unsigned char *) str1);				// Print string on line 1
 
   // enable timer 0 overflow interrupt
-  sbi(TIMSK0, TOIE0);
+  sei();
 
 	while (1) {
     sci_out(0xfe);				// Clear the screen

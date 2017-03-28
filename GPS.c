@@ -241,7 +241,7 @@ int gpsstrcmp(const char *str1, const char *str2)
 
 
 // lat/long in hundred thousandths of a degree and age of fix in milliseconds
-void get_position(long *latitude, long *longitude, unsigned long *fix_age = 0)
+void get_position(long *latitude, long *longitude, unsigned long *fix_age)
 {
   if (latitude) *latitude = _latitude;
   if (longitude) *longitude = _longitude;
@@ -256,18 +256,19 @@ float distance_between (float lat1, float long1, float lat2, float long2)
   // distance computation for hypothetical sphere of radius 6372795 meters.
   // Because Earth is no exact sphere, rounding errors may be up to 0.5%.
   // Courtesy of Maarten Lamers
-  float delta = radians(long1-long2);
+  // float delta = radians(long1-long2);
+  float delta = long1-long2;
   float sdlong = sin(delta);
   float cdlong = cos(delta);
-  lat1 = radians(lat1);
-  lat2 = radians(lat2);
+  // lat1 = radians(lat1);
+  // lat2 = radians(lat2);
   float slat1 = sin(lat1);
   float clat1 = cos(lat1);
   float slat2 = sin(lat2);
   float clat2 = cos(lat2);
   delta = (clat1 * slat2) - (slat1 * clat2 * cdlong);
-  delta = sq(delta);
-  delta += sq(clat2 * sdlong);
+  delta = delta * delta;
+  delta += (clat2 * sdlong) * (clat2 * sdlong);
   delta = sqrt(delta);
   float denom = (slat1 * slat2) + (clat1 * clat2 * cdlong);
   delta = atan2(delta, denom);

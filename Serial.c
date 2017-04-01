@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include "Serial.h"
 
 /*
   sci_init - Initialize the SCI port
@@ -6,7 +7,7 @@
 void sci_init(void) {
 	UBRR0 = MYUBRR;				// Set baud rate
 	UCSR0B |= (1 << TXEN0);		// Turn on transmitter
-	UCSR0B |= (1 << TXEN0);		// Turn on recv
+	UCSR0B |= (1 << RXEN0);		// Turn on recv
 	UCSR0C = (3 << UCSZ00);		// Set for asynchronous operation, no parity,
 										// one stop bit, 8 data bits
 }

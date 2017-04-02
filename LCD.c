@@ -74,3 +74,9 @@ void lcd_out(int pos, unsigned char *s)
 
 	sci_outs(s);							// Output the string
 }
+
+void lcd_clear()
+{
+	sci_out(0xfe);
+	sci_out(0x51);
+}

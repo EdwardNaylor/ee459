@@ -16,4 +16,6 @@
 
 unsigned long millis();
 
+void timer_init();
+
 #endif

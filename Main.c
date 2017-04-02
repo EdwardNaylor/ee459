@@ -19,12 +19,7 @@ int main(void) {
 
 	lcd_init();						// Initialize the LCD
 
-	//lcd_out(55, (unsigned char *) str1);				// Print string on line 1
-
-  // enable timer 0 overflow interrupt
-	TIMSK0 |= (1 << TOIE0);
-	TCCR0A = 0;
-	TCCR0B |= (1 << CS00);
+	timer_init();
 
 	//enable global interrupts
 	sei();

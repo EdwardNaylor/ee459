@@ -1,9 +1,18 @@
 #include "Timer.h"
 #include <avr/interrupt.h>
+#include <avr/io.h>
 
 unsigned char timer0_fract;
 unsigned long timer0_millis;
 unsigned long timer0_overflow_count;
+
+void timer_init()
+{
+  // enable timer 0 overflow interrupt
+  TIMSK0 |= (1 << TOIE0);
+  TCCR0A = 0;
+  TCCR0B |= (1 << CS00); //start timer
+}
 
 ISR(TIMER0_OVF_vect)
 {

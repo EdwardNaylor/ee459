@@ -42,8 +42,8 @@ byte _term_number;
 byte _term_offset;
 bool _gps_data_good;
 
-void setup();
-void loop();
+void gps_init();
+void gps_loop();
 // Get and process GPS data
 void gpsdump();
 // Feed data as it becomes available

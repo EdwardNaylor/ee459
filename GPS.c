@@ -5,7 +5,7 @@
 #include <util/delay.h>
 #include <math.h>
 
-void gps_setup() {
+void gps_init() {
   // nss.begin(9600);  // Communicate at 9600 baud (default for PAM-7Q module)
 }
 

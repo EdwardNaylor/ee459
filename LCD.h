@@ -3,5 +3,6 @@
 
 void lcd_init(void);
 void lcd_out(int, unsigned char *);
+void lcd_clear();
 
 #endif

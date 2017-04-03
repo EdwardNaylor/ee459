@@ -3,13 +3,13 @@
 #include <stdio.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
-#include "compass.h"
+#include "Compass.h"
 #include "Serial.h"
 
 #define BDIV (FOSC / 100000 - 16) / 2 + 1	// Puts I2C rate just below 100kHz
 
 void i2c_init(uint8_t bdiv);
-uint8_t i2c_io(uint8_t device_addr, uint8_t *ap, uint16_t an, 
+uint8_t i2c_io(uint8_t device_addr, uint8_t *ap, uint16_t an,
 			   uint8_t *wp, uint16_t wn, uint8_t *rp, uint16_t rn);
 
 void compass_init(void)
@@ -96,7 +96,7 @@ void i2c_init(uint8_t bdiv)
 		0x38 - Arbitration lost with address or data
 		0x48 - NAK received after sending device address for reading
 
-  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 This "i2c_io" I2C routine is an attempt to provide an I/O function for both
 reading and writing, rather than have separate functions.
@@ -141,7 +141,7 @@ A typical read with a 1-byte address is done with
 	i2c_io(0xD0, abuf, 1, NULL, 0, rbuf, 20);
 */
 
-uint8_t i2c_io(uint8_t device_addr, uint8_t *ap, uint16_t an, 
+uint8_t i2c_io(uint8_t device_addr, uint8_t *ap, uint16_t an,
 			   uint8_t *wp, uint16_t wn, uint8_t *rp, uint16_t rn)
 {
 	uint8_t status, send_stop, wrote, start_stat;
@@ -246,7 +246,7 @@ uint8_t i2c_io(uint8_t device_addr, uint8_t *ap, uint16_t an,
 
 		status = 0;						 // Set status value to successful
 	}
-	
+
 nakstop:									// Come here to send STOP after a NAK
 	if (send_stop)
 		TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);  // Send STOP condition

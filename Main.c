@@ -39,8 +39,7 @@ int main(void) {
 
 	while (1) {
 		_delay_ms(10);
-    sci_out(0xfe);				// Clear the screen
-    sci_out(0x51);
+		lcd_clear();
 		sprintf(buffer,"%ld", millis());
     lcd_out(0, buffer);	// Print string on line 1
 		// sprintf(buffer,"%ld", compass_get_x());

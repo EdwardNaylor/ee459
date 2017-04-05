@@ -25,15 +25,15 @@ void compass_init(void)
 	wbuf[5] = 0x00;
 
 	// may not need the first two lines
-	i2c_io(0x3C, wbuf + 0, 1, wbuf + 1, 1, NULL, 0);
-	i2c_io(0x3C, wbuf + 2, 1, wbuf + 3, 1, NULL, 0);
+	//i2c_io(0x3C, wbuf + 0, 1, wbuf + 1, 1, NULL, 0);
+	/*i2c_io(0x3C, wbuf + 2, 1, wbuf + 3, 1, NULL, 0);*/
 	i2c_io(0x3C, wbuf + 4, 1, wbuf + 5, 1, NULL, 0);
 }
 
 // It would be better to use a timer interupt rather than writing serial i2c
 uint8_t compass_get_x(void)
 {
-	uint8_t wbuf[1] = {0x05};
+	uint8_t wbuf[1] = {0x03};
 	uint8_t rbuf[2];
 	uint8_t x;
 	i2c_io(0x3C, wbuf, 1, NULL, 0, rbuf, 2);
@@ -59,7 +59,7 @@ uint8_t compass_get_y(void)
 
 uint8_t compass_get_z(void)
 {
-	uint8_t wbuf[1] = {0x03};
+	uint8_t wbuf[1] = {0x05};
 	uint8_t rbuf[2];
 	uint8_t z;
 	i2c_io(0x3C, wbuf, 1, NULL, 0, rbuf, 2);

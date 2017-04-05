@@ -26,11 +26,11 @@ int main(void) {
 
 	compass_init();			// Initialize the Compass
 
-	gps_init();				// Initialize the GPS
+	//gps_init();				// Initialize the GPS
 
 	shift_init();			// Initialize the Shift Registers
 
-	buttons_init();
+	//buttons_init();
 
 	//enable global interrupts
 	sei();
@@ -38,14 +38,49 @@ int main(void) {
 	shift_out(0xFF, 0xFF);
 
 	while (1) {
-		_delay_ms(10);
 		lcd_clear();
 		sprintf(buffer,"%ld", millis());
-    lcd_out(0, buffer);	// Print string on line 1
-		// sprintf(buffer,"%ld", compass_get_x());
-		// lcd_out(40, compass_get_x());
-		// sprintf(buffer,"%ld",  compass_get_y());
-		// lcd_out(20, buffer);
+		lcd_out(0, buffer);	// Print string on line 1
+		unsigned char x, y, z;
+		x = compass_get_x();
+		y = compass_get_y();
+		z = compass_get_z();
+		sprintf(buffer,"x:%u y:%u z:%u", x, y, z);
+		lcd_out(40, buffer);
+
+		while (!gps_encode(sci_in())) {
+
+		}
+
+		sprintf(buffer,"lat:%ld %d", _latitude, _gps_data_good);
+		lcd_out(20, buffer);
+		/*char buf[100];
+		unsigned char i = 0;
+		bool flag = false;
+
+		while (1)
+		{
+			char c = sci_in();
+			if(c == '$')
+			{
+				flag = true;
+			}
+			if(flag)
+			{
+				buf[i] = c;
+				i++;
+			}
+			if(i == 20)
+			{
+				buf[19] = '\0';
+				lcd_out(0, buf);
+				i = 0;
+				flag = false;
+			}
+		}*/
+
+		_delay_ms(250);
+
 		//
 		// shift_out(0xFF, 0xFF);
 		// _delay_ms(500);

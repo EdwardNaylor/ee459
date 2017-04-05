@@ -5,38 +5,7 @@
 #include <util/delay.h>
 #include <math.h>
 
-void gps_init() {
-  // nss.begin(9600);  // Communicate at 9600 baud (default for PAM-7Q module)
-}
-
-void loop() {
-  bool newdata = false;
-  _delay_ms(5000);
-  if (feedgps()) {
-    newdata = true;
-  }
-  if (newdata) {
-    gpsdump();
-  }
-}
-
-// Get and process GPS data
-void gpsdump() {
-  float flat, flon;
-  unsigned long age;
-  get_position(&flat, &flon, &age);
-}
-
-// Feed data as it becomes available
-bool feedgps() {
-  // while (nss.available()) {
-  //   if (encode(nss.read()))
-  //     return true;
-  // }
-  return false;
-}
-
-bool encode(char c) {
+bool gps_encode(char c) {
   bool valid_sentence = false;
 
   switch(c)
@@ -130,7 +99,7 @@ bool term_complete()
     byte checksum = 16 * from_hex(_term[0]) + from_hex(_term[1]);
     if (checksum == _parity)
     {
-      if (_gps_data_good)
+      if (true)
       {
         _last_time_fix = _new_time_fix;
         _last_position_fix = _new_position_fix;

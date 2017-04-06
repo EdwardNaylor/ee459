@@ -9,6 +9,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // unsigned char str1[] = "1234567890";
 // unsigned char str2[] = ">> USC EE459L <<";
@@ -35,25 +36,34 @@ int main(void) {
 	//enable global interrupts
 	sei();
 
-	shift_out(0xFF, 0xFF);
 
 	while (1) {
 		lcd_clear();
 		sprintf(buffer,"%ld", millis());
 		lcd_out(0, buffer);	// Print string on line 1
-		unsigned char x, y, z;
+		short x, y, z;
 		x = compass_get_x();
 		y = compass_get_y();
 		z = compass_get_z();
-		sprintf(buffer,"x:%u y:%u z:%u", x, y, z);
+
+		sprintf(buffer,"x:%hd y:%hd z:%hd", x, y, z);
 		lcd_out(40, buffer);
 
-		while (!gps_encode(sci_in())) {
+		double theta = compass_get_north();
+		int position = theta / 45;
 
-		}
-
-		sprintf(buffer,"lat:%ld %d", _latitude, _gps_data_good);
+		dtostrf(theta, -10, 3, buffer);
 		lcd_out(20, buffer);
+
+		shift_out(1 << position, 1 << position);
+
+
+		// while (!gps_encode(sci_in())) {
+		//
+		// }
+		//
+		// sprintf(buffer,"lat:%ld %d", _latitude, _gps_data_good);
+		// lcd_out(20, buffer);
 		/*char buf[100];
 		unsigned char i = 0;
 		bool flag = false;
@@ -79,7 +89,7 @@ int main(void) {
 			}
 		}*/
 
-		_delay_ms(250);
+		_delay_ms(50);
 
 		//
 		// shift_out(0xFF, 0xFF);

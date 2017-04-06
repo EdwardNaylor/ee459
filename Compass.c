@@ -5,6 +5,7 @@
 #include <util/delay.h>
 #include "Compass.h"
 #include "Serial.h"
+#include <math.h>
 
 #define BDIV (FOSC / 100000 - 16) / 2 + 1	// Puts I2C rate just below 100kHz
 
@@ -30,12 +31,21 @@ void compass_init(void)
 	i2c_io(0x3C, wbuf + 4, 1, wbuf + 5, 1, NULL, 0);
 }
 
+double compass_get_north() {
+	double theta = 180.0 * atan2(compass_get_y(), compass_get_x()) / M_PI - 90 + 22.5;
+	if (theta < 0) {
+		return 360.0 + theta;
+	} else {
+		return theta;
+	}
+}
+
 // It would be better to use a timer interupt rather than writing serial i2c
-uint8_t compass_get_x(void)
+short compass_get_x(void)
 {
 	uint8_t wbuf[1] = {0x03};
 	uint8_t rbuf[2];
-	uint8_t x;
+	short x;
 	i2c_io(0x3C, wbuf, 1, NULL, 0, rbuf, 2);
 
 	x = rbuf[0] << 8;
@@ -44,11 +54,11 @@ uint8_t compass_get_x(void)
 	return x;
 }
 
-uint8_t compass_get_y(void)
+short compass_get_y(void)
 {
 	uint8_t wbuf[1] = {0x07};
 	uint8_t rbuf[2];
-	uint8_t y;
+	short y;
 	i2c_io(0x3C, wbuf, 1, NULL, 0, rbuf, 2);
 
 	y = rbuf[0] << 8;
@@ -57,11 +67,11 @@ uint8_t compass_get_y(void)
 	return y;
 }
 
-uint8_t compass_get_z(void)
+short compass_get_z(void)
 {
 	uint8_t wbuf[1] = {0x05};
 	uint8_t rbuf[2];
-	uint8_t z;
+	short z;
 	i2c_io(0x3C, wbuf, 1, NULL, 0, rbuf, 2);
 
 	z = rbuf[0] << 8;

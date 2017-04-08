@@ -44,7 +44,7 @@ bool _gps_data_good;
 
 bool gps_encode(char c);
 float distance_between(float lat1, float long1, float lat2, float long2);
-void get_position(long *latitude, long *longitude, unsigned long *fix_age);
+void get_position(float *latitude, float *longitude, unsigned long *fix_age);
 
 //internal utilities
 int from_hex(char a);

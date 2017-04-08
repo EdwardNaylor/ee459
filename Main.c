@@ -31,33 +31,46 @@ int main(void) {
 
 	shift_init();			// Initialize the Shift Registers
 
-	//buttons_init();
+	buttons_init();
 
 	//enable global interrupts
 	sei();
 
-
 	while (1) {
 		lcd_clear();
 		sprintf(buffer,"%ld", millis());
-		lcd_out(0, buffer);	// Print string on line 1
+		lcd_out(LCD_LINE_ONE, buffer);	// Print string on line 1
 		short x, y, z;
 		x = compass_get_x();
 		y = compass_get_y();
 		z = compass_get_z();
 
 		sprintf(buffer,"x:%hd y:%hd z:%hd", x, y, z);
-		lcd_out(40, buffer);
+		lcd_out(LCD_LINE_TWO, buffer);
 
 		double theta = compass_get_north();
-		int position = theta / 45;
+		int position =  (int) round(theta / 45);
+		if (position == 8) {
+			position = 0;
+		}
 
-		dtostrf(theta, -10, 3, buffer);
-		lcd_out(20, buffer);
+		uint8_t theta_buffer[10];
+		dtostrf(theta, -10, 0, theta_buffer);
+		sprintf(buffer, "%s %s", compass_get_dir(), theta_buffer);
+		lcd_out(LCD_LINE_THREE, buffer);
 
 		shift_out(1 << position, 1 << position);
 
-
+		float lat;
+		float lon;
+		unsigned long age;
+		get_position(&lat, &lon, &age);
+		uint8_t lat_buffer[5];
+		uint8_t lon_buffer[5];
+		dtostrf(lat, -5, 2, lat_buffer);
+		dtostrf(lon, -5, 2, lon_buffer);
+		sprintf(buffer,"%s %s fix: %d", lat_buffer, lon_buffer, _gps_data_good);
+		lcd_out(LCD_LINE_FOUR, buffer);
 		// while (!gps_encode(sci_in())) {
 		//
 		// }
@@ -98,5 +111,5 @@ int main(void) {
 		// _delay_ms(500);
 	}
 
-	return 0;   /* never reached */
+	return 0;	 /* never reached */
 }

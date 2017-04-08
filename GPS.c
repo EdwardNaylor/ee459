@@ -209,9 +209,8 @@ int gpsstrcmp(const char *str1, const char *str2)
   return *str1;
 }
 
-
 // lat/long in hundred thousandths of a degree and age of fix in milliseconds
-void get_position(long *latitude, long *longitude, unsigned long *fix_age)
+void get_position(float *latitude, float *longitude, unsigned long *fix_age)
 {
   if (latitude) *latitude = _latitude;
   if (longitude) *longitude = _longitude;

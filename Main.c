@@ -27,14 +27,22 @@ int main(void) {
 
 	compass_init();			// Initialize the Compass
 
-	//gps_init();				// Initialize the GPS
-
 	shift_init();			// Initialize the Shift Registers
+
+	gps_init();			// Initialize the GPS
 
 	buttons_init();
 
 	//enable global interrupts
 	sei();
+
+	while (!gps_encode(sci_in())) {
+		lcd_clear();
+		sprintf(buffer,"Fixing GPS, plz wait");
+		lcd_out(LCD_LINE_ONE, buffer);	// Print string on line 1
+		// sprintf(buffer,"good: %d time: %ld", _gps_data_good, _time);
+		// lcd_out(LCD_LINE_TWO, buffer);	// Print string on line 1
+	}
 
 	while (1) {
 		lcd_clear();
@@ -71,9 +79,7 @@ int main(void) {
 		dtostrf(lon, -5, 2, lon_buffer);
 		sprintf(buffer,"%s %s fix: %d", lat_buffer, lon_buffer, _gps_data_good);
 		lcd_out(LCD_LINE_FOUR, buffer);
-		// while (!gps_encode(sci_in())) {
-		//
-		// }
+
 		//
 		// sprintf(buffer,"lat:%ld %d", _latitude, _gps_data_good);
 		// lcd_out(20, buffer);
@@ -100,7 +106,7 @@ int main(void) {
 				i = 0;
 				flag = false;
 			}
-		}*/
+		}
 
 		_delay_ms(50);
 

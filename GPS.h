@@ -42,6 +42,7 @@ byte _term_number;
 byte _term_offset;
 bool _gps_data_good;
 
+void gps_init(void);
 bool gps_encode(char c);
 float distance_between(float lat1, float long1, float lat2, float long2);
 void get_position(float *latitude, float *longitude, unsigned long *fix_age);

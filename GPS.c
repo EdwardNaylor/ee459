@@ -5,6 +5,31 @@
 #include <util/delay.h>
 #include <math.h>
 
+void gps_init(void) {
+  // properties
+  _time, _new_time = GPS_INVALID_TIME;
+  _time, _new_time = GPS_INVALID_TIME;
+  _date, _new_date = GPS_INVALID_DATE;
+  _date, _new_date = GPS_INVALID_DATE;
+  _latitude, _new_latitude = GPS_INVALID_ANGLE;
+  _longitude, _new_longitude = GPS_INVALID_ANGLE;
+  _altitude, _new_altitude = GPS_INVALID_ALTITUDE;
+  _speed, _new_speed = GPS_INVALID_SPEED;
+  _course, _new_course = GPS_INVALID_ANGLE;
+
+  _last_time_fix, _new_time_fix = GPS_INVALID_FIX_TIME;
+  _last_position_fix, _new_position_fix = GPS_INVALID_FIX_TIME;
+
+  // parsing state variables
+  _parity = 0;
+  _is_checksum_term = false;
+  _term[0] = '\0';
+  _sentence_type = _GPS_SENTENCE_OTHER;
+  _term_number = 0;
+  _term_offset = 0;
+  _gps_data_good = false;
+}
+
 bool gps_encode(char c) {
   bool valid_sentence = false;
 
@@ -99,7 +124,7 @@ bool term_complete()
     byte checksum = 16 * from_hex(_term[0]) + from_hex(_term[1]);
     if (checksum == _parity)
     {
-      if (true)
+      if (_gps_data_good)
       {
         _last_time_fix = _new_time_fix;
         _last_position_fix = _new_position_fix;

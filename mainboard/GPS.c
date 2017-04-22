@@ -5,6 +5,16 @@
 #include <util/delay.h>
 #include <math.h>
 
+bool check_gps() {
+  //set mux bit to gps
+  PORTD &= (1 << MUXSELECT);
+  if (( UCSR0A & (1 << RXC0))) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void gps_init(void) {
   // properties
   _time, _new_time = GPS_INVALID_TIME;

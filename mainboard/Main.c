@@ -37,14 +37,6 @@ int main(void) {
 	//enable global interrupts
 	sei();
 
-	// while (!gps_encode(gps_in())) {
-	// 	lcd_clear();
-	// 	sprintf(buffer,"Fixing GPS, plz wait");
-	// 	lcd_out(LCD_LINE_ONE, buffer);	// Print string on line 1
-	// 	// sprintf(buffer,"good: %d time: %ld", _gps_data_good, _time);
-	// 	// lcd_out(LCD_LINE_TWO, buffer);	// Print string on line 1
-	// }
-
 	while (1) {
 		lcd_clear();
 		sprintf(buffer,"%ld", millis());
@@ -54,7 +46,12 @@ int main(void) {
 		y = compass_get_y();
 		z = compass_get_z();
 
-		sprintf(buffer,"x:%hd y:%hd z:%hd", x, y, z);
+		//radio_out('Q');
+		if (check_radio()) {
+			sprintf(buffer,"radio_in: %c", radio_in());
+		} else {
+			sprintf(buffer,"radio_in: empty");
+		}
 		lcd_out(LCD_LINE_TWO, buffer);
 
 		double theta = compass_get_north();
@@ -70,18 +67,25 @@ int main(void) {
 
 		shift_out(~(1 << position), 1 << position);
 
-		float lat;
-		float lon;
-		unsigned long age;
-		get_position(&lat, &lon, &age);
-		uint8_t lat_buffer[5];
-		uint8_t lon_buffer[5];
-		dtostrf(lat, -5, 2, lat_buffer);
-		dtostrf(lon, -5, 2, lon_buffer);
-		sprintf(buffer,"%s %s fix: %d", lat_buffer, lon_buffer, _gps_data_good);
-		lcd_out(LCD_LINE_FOUR, buffer);
+		if (_gps_data_good) {
+			float lat;
+			float lon;
+			unsigned long age;
+			get_position(&lat, &lon, &age);
+			uint8_t lat_buffer[5];
+			uint8_t lon_buffer[5];
+			dtostrf(lat, -5, 2, lat_buffer);
+			dtostrf(lon, -5, 2, lon_buffer);
+			sprintf(buffer,"%s %s fix: %d", lat_buffer, lon_buffer, _gps_data_good);
+			lcd_out(LCD_LINE_FOUR, buffer);
+		} else {
+			sprintf(buffer,"No GPS fix");
+			lcd_out(LCD_LINE_FOUR, buffer);
+		}
 
-		_delay_ms(50);
+
+
+		_delay_ms(500);
 	}
 		//
 		// sprintf(buffer,"lat:%ld %d", _latitude, _gps_data_good);

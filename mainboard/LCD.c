@@ -22,7 +22,7 @@ void lcd_init()
 void lcd_out(int pos, unsigned char *s)
 {
 	//set demux bit to LCD
-	PORTD |= (1<< DEMUXSELECT);
+	PORTD &= ~(1 << DEMUXSELECT);
 
 	sci_out((unsigned char) 0xfe);	// Set the cursor position
 	sci_out((unsigned char) 0x45);
@@ -33,6 +33,9 @@ void lcd_out(int pos, unsigned char *s)
 
 void lcd_clear()
 {
+	//set demux bit to LCD
+	PORTD &= ~(1<< DEMUXSELECT);
+
 	sci_out(0xfe);
 	sci_out(0x51);
 }

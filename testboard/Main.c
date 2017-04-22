@@ -1,4 +1,4 @@
-#include "Timer.h"
+	 	#include "Timer.h"
 #include "Serial.h"
 #include <avr/io.h>
 #include <util/delay.h>
@@ -25,7 +25,7 @@ int main(void) {
 	PORTC |= (1 << PC3);
 
 	while (1) {
-		sci_out(0x1f);
+		sci_out('U');
 
 		_delay_ms(500);
 	}

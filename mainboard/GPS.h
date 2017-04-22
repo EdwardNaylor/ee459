@@ -42,6 +42,7 @@ byte _term_number;
 byte _term_offset;
 bool _gps_data_good;
 
+bool check_gps();
 void gps_init(void);
 bool gps_encode(char c);
 char gps_in(void);

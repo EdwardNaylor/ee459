@@ -9,8 +9,7 @@ void sci_init(void) {
 	UBRR0 = MYUBRR;				// Set baud rate
 	UCSR0B |= (1 << TXEN0);		// Turn on transmitter
 	UCSR0B |= (1 << RXEN0);		// Turn on recv
-	UCSR0C = (3 << UCSZ00);		// Set for asynchronous operation, no parity,
-										// one stop bit, 8 data bits
+	UCSR0C = (3 << UCSZ00);		// Set for asynchronous operation, no parity, one stop bit, 8 data bits
 
 	DDRD |= (1 << DEMUXSELECT); // set demux select port for output
 	DDRD |= (1 << MUXSELECT); // set mux select port for output
@@ -22,7 +21,7 @@ void sci_init(void) {
 void sci_out(unsigned char ch)
 {
 	while ( (UCSR0A & (1<<UDRE0)) == 0);
-	UDR0 = ~ch; //input to demux is active low
+	UDR0 = ch; //input to demux is active low, but is inverted in hardware
 }
 
 /*

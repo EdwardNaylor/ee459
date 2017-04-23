@@ -1,14 +1,27 @@
-	 	#include "Timer.h"
+#include "Timer.h"
 #include "Serial.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define SWITCH_MASK 0x0F
 
 uint8_t get_swtich()
 {
 	return PINC & SWITCH_MASK;
+}
+
+void send_serial(char * text) {
+	char str[80];
+	int len = strlen(text);
+	strcpy(str, text);
+	char lenBuffer[10];
+	itoa(len, lenBuffer, 10);
+	strcat(str, lenBuffer);
+	strcat(str, ";");
+	sci_outs(str);
 }
 
 int main(void) {
@@ -34,20 +47,20 @@ int main(void) {
 	while (1) {
 		switch(get_swtich())
 		{
-			case 0:
-				sci_out('u');
-				break;
 			case 1:
-				sci_out(0x0F);
+				send_serial("$testA,0,12,12;");
 				break;
 			case 2:
-				sci_out(0xF0);
+				send_serial("$testB,1,123,345;");
 				break;
 			case 4:
-				sci_out(0xFF);
+				send_serial("$testC,2,345,456;");
+				break;
+			case 8:
+				send_serial("$testD,3,45,41;");
 				break;
 		}
-		_delay_ms(500);
+		_delay_ms(10);
 	}
 	return 0; //never reached
 }

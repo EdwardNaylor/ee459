@@ -41,6 +41,13 @@ serial_in  - Read a byte  from  the  USART0  and  return  it
 */
 char sci_in()
 {
-	while ( !( UCSR0A & (1 << RXC0)) );
+	int timeout = 0;
+	while ( !( UCSR0A & (1 << RXC0)) ) {
+			if (timeout > 1000) {
+				return '\0';
+			}
+			timeout++;
+	};
+
 	return  UDR0;
 }

@@ -11,11 +11,7 @@
 #include <avr/interrupt.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-// unsigned char str1[] = "1234567890";
-// unsigned char str2[] = ">> USC EE459L <<";
-// unsigned char str3[] = ">> at328-6.c <<<";
-// unsigned char str4[] = "-- April 11, 2011 --";
+#include <string.h>
 
 unsigned char buffer[20];
 
@@ -34,24 +30,26 @@ int main(void) {
 
 	buttons_init();
 
+	// UCSR0B = (1 << RXCIE0) | (1 << RXEN0);
+
 	//enable global interrupts
 	sei();
 
 	while (1) {
+		radio_send_message();
+
 		lcd_clear();
-		sprintf(buffer,"%ld", millis());
+		sprintf(buffer,"%s", send_str);
 		lcd_out(LCD_LINE_ONE, buffer);	// Print string on line 1
 		short x, y, z;
 		x = compass_get_x();
 		y = compass_get_y();
 		z = compass_get_z();
 
-		//radio_out('Q');
 		if (check_radio()) {
-			sprintf(buffer,"radio_in: %c", radio_in());
-		} else {
-			sprintf(buffer,"radio_in: empty");
+			radio_read(); //blocking
 		}
+		sprintf(buffer,"%s %d %ld %ld", radio_name, radio_status, radio_lat, radio_lon);
 		lcd_out(LCD_LINE_TWO, buffer);
 
 		double theta = compass_get_north();
@@ -67,25 +65,31 @@ int main(void) {
 
 		shift_out(~(1 << position), 1 << position);
 
-		if (_gps_data_good) {
+		if (_gps_data_ever_good) {
 			float lat;
 			float lon;
 			unsigned long age;
 			get_position(&lat, &lon, &age);
-			uint8_t lat_buffer[5];
-			uint8_t lon_buffer[5];
-			dtostrf(lat, -5, 2, lat_buffer);
-			dtostrf(lon, -5, 2, lon_buffer);
-			sprintf(buffer,"%s %s fix: %d", lat_buffer, lon_buffer, _gps_data_good);
+			uint8_t lat_buffer[10];
+			uint8_t lon_buffer[10];
+			dtostrf(lat, -3, 2, lat_buffer);
+			dtostrf(lon, -3, 2, lon_buffer);
+			sprintf(buffer,"%s %s", lat_buffer, lon_buffer);
 			lcd_out(LCD_LINE_FOUR, buffer);
 		} else {
-			sprintf(buffer,"No GPS fix");
+			sprintf(buffer,"GPS fixing...");
 			lcd_out(LCD_LINE_FOUR, buffer);
 		}
 
+		int timeout = 0;
+		while (!gps_encode(gps_in())) {
+			if (timeout > 1000) {
+				break;
+			}
+			timeout++;
+		}
 
-
-		_delay_ms(500);
+		//_delay_ms(250);
 	}
 		//
 		// sprintf(buffer,"lat:%ld %d", _latitude, _gps_data_good);

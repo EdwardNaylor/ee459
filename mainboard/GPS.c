@@ -38,6 +38,7 @@ void gps_init(void) {
   _term_number = 0;
   _term_offset = 0;
   _gps_data_good = false;
+  _gps_data_ever_good = false;
 }
 
 char gps_in() {
@@ -143,6 +144,8 @@ bool term_complete()
     {
       if (_gps_data_good)
       {
+        _gps_data_ever_good = true;
+
         _last_time_fix = _new_time_fix;
         _last_position_fix = _new_position_fix;
 
@@ -254,8 +257,8 @@ int gpsstrcmp(const char *str1, const char *str2)
 // lat/long in hundred thousandths of a degree and age of fix in milliseconds
 void get_position(float *latitude, float *longitude, unsigned long *fix_age)
 {
-  if (latitude) *latitude = _latitude;
-  if (longitude) *longitude = _longitude;
+  if (latitude) *latitude = _latitude / 100000.0;
+  if (longitude) *longitude = _longitude / 100000.0;
   if (fix_age) *fix_age = _last_position_fix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - _last_position_fix;
 }
 

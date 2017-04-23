@@ -41,6 +41,7 @@ byte _sentence_type;
 byte _term_number;
 byte _term_offset;
 bool _gps_data_good;
+bool _gps_data_ever_good;
 
 bool check_gps();
 void gps_init(void);

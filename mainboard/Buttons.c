@@ -42,7 +42,7 @@ void buttons_init() {
 	PCMSK2 |= (1 << PCINT23);
 
 	//enable interrupts on PORTD
-	PCICR |= (1 << PCIE2);	
+	PCICR |= (1 << PCIE2);
 }
 
 // ISR for PORTD change interrupt.

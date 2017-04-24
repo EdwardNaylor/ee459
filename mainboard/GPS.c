@@ -4,6 +4,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <math.h>
+#include "Radio.h"
 
 bool check_gps() {
   //set mux bit to gps
@@ -156,6 +157,8 @@ bool term_complete()
           _date      = _new_date;
           _latitude  = _new_latitude;
           _longitude = _new_longitude;
+          radio_lat[0] = _latitude;
+          radio_lon[0] = _longitude;
           _speed     = _new_speed;
           _course    = _new_course;
           break;
@@ -164,6 +167,8 @@ bool term_complete()
           _time      = _new_time;
           _latitude  = _new_latitude;
           _longitude = _new_longitude;
+          radio_lat[0] = _latitude;
+          radio_lon[0] = _longitude;
           break;
         }
 
@@ -255,36 +260,38 @@ int gpsstrcmp(const char *str1, const char *str2)
 }
 
 // lat/long in hundred thousandths of a degree and age of fix in milliseconds
-void get_position(float *latitude, float *longitude, unsigned long *fix_age)
+void get_position(float *latitude, float *longitude/*, unsigned long *fix_age*/)
 {
   if (latitude) *latitude = _latitude / 100000.0;
   if (longitude) *longitude = _longitude / 100000.0;
-  if (fix_age) *fix_age = _last_position_fix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - _last_position_fix;
+  // if (fix_age) *fix_age = _last_position_fix == GPS_INVALID_FIX_TIME ? GPS_INVALID_AGE : millis() - _last_position_fix;
 }
 
 /* static */
-float distance_between (float lat1, float long1, float lat2, float long2)
+float distance_between (float lat1, float lon1, float lat2, float lon2)
 {
-  // returns distance in meters between two positions, both specified
-  // as signed decimal-degrees latitude and longitude. Uses great-circle
-  // distance computation for hypothetical sphere of radius 6372795 meters.
-  // Because Earth is no exact sphere, rounding errors may be up to 0.5%.
-  // Courtesy of Maarten Lamers
-  // float delta = radians(long1-long2);
-  float delta = long1-long2;
-  float sdlong = sin(delta);
-  float cdlong = cos(delta);
-  // lat1 = radians(lat1);
-  // lat2 = radians(lat2);
-  float slat1 = sin(lat1);
-  float clat1 = cos(lat1);
-  float slat2 = sin(lat2);
-  float clat2 = cos(lat2);
-  delta = (clat1 * slat2) - (slat1 * clat2 * cdlong);
-  delta = delta * delta;
-  delta += (clat2 * sdlong) * (clat2 * sdlong);
-  delta = sqrt(delta);
-  float denom = (slat1 * slat2) + (clat1 * clat2 * cdlong);
-  delta = atan2(delta, denom);
-  return delta * 6372795;
+  float R = 6372795; // metres
+  float w1 = lat1 * M_PI / 180;
+  float w2 = lat2 * M_PI / 170;
+  float deltaW = (lat2-lat1) * M_PI / 180;
+  float l = (lon2-lon1) * M_PI / 180;
+
+  float a = sin(deltaW/2) * sin(deltaW/2) +
+          cos(w1) * cos(w2) *
+          sin(l/2) * sin(l/2);
+  float c = 2 * atan2(sqrt(a), sqrt(1-a));
+
+  float d = R * c;
+
+  return d;
+}
+
+float bearing_between (float lat1, float long1, float lat2, float long2)
+{
+  float dLon = long1 - long2;
+  float y = sin(dLon) * cos(lat2);
+  float x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+  int brng = (int) (atan2(y, x) * 180 / M_PI);
+  brng = (360 - ((brng + 360) % 360));
+  return brng;
 }

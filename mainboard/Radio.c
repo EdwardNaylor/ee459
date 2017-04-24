@@ -6,10 +6,16 @@
 #include <stdio.h>
 #include "GPS.h"
 #include "Buttons.h"
+#include "LCD.h"
+#include "Timer.h"
+
+void radio_init() {
+  strcpy(radio_name[0], "Mainboard");
+}
 
 void radio_send_message() {
   strcpy(send_str, "$");
-  strcat(send_str, "mainboard");
+  strcat(send_str, radio_name[0]);
   strcat(send_str, ",");
   char statusBuffer[10];
   itoa(status, statusBuffer, 10);
@@ -79,29 +85,54 @@ void radio_read() {
     if (timeout > 50) {
       return;
     }
-    radio_len_buffer[radio_index] = radio_in();
-    if (radio_len_buffer[radio_index] == ';') {
-      radio_len_buffer[radio_index] = '\0';
-      radio_length = atoi(radio_len_buffer);
+    radio_sum_buffer[radio_index] = radio_in();
+    if (radio_sum_buffer[radio_index] == ';') {
+      radio_sum_buffer[radio_index] = '\0';
+      radio_sum = atoi(radio_sum_buffer);
       break;
     }
     radio_index++;
     timeout++;
   }
 
-  if (strlen(radio_buffer) == radio_length - 2) {
+  //checksum
+  int sum = 0;
+  int len = strlen(radio_buffer);
+  for (int i = 0; i < len; i++) {
+    sum += radio_buffer[i];
+  }
+
+  // unsigned char buffer[20];
+  // sprintf(buffer,"calc %d radio %s", sum, radio_sum_buffer);
+  // lcd_out(LCD_LINE_FOUR, buffer);
+
+  if (sum == radio_sum - '$' - ';') {
+    //checksum success
     int count = 0;
     char *pt;
     pt = strtok (radio_buffer,",");
-    while (pt != NULL) {
+    int user_insert_index = -1;
+    while (pt != NULL && pt != "") {
         if (count == 0) {
-          strcpy(radio_name, pt);
+          //name
+          for (int i = 0; i < max_users; i++) {
+            if (strcmp(radio_name[i], pt) == 0) {
+              user_insert_index = i;
+            }
+          }
+          if (user_insert_index == -1) {
+            max_users++;
+            user_insert_index = max_users - 1;
+          }
+
+          strcpy(radio_name[user_insert_index], pt);
+          radio_fix[user_insert_index] = millis();
         } else if (count == 1) {
-          radio_status = atoi(pt);
+          radio_status[user_insert_index] = atoi(pt);
         } else if (count == 2) {
-          radio_lat = strtol(pt, 0, 10);
+          radio_lat[user_insert_index] = strtol(pt, 0, 10);
         } else if (count == 3) {
-          radio_lon = strtol(pt, 0, 10);
+          radio_lon[user_insert_index] = strtol(pt, 0, 10);
         }
         count++;
         pt = strtok (NULL, ",");

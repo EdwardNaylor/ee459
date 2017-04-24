@@ -3,6 +3,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include "Timer.h"
+#include "Radio.h"
 
 // Button definitions
 #define PINTOGGLE PD5
@@ -17,6 +18,11 @@
 unsigned long last_interrupt_time = 0;
 
 void buttons_init() {
+	printLCD = 0;
+	printOverride = 0;
+	user_index = 0;
+	max_users = 1;
+
 	// set button pins as input
 	DDRD &= ~(1 << PINTOGGLE);
 	DDRD &= ~(1 << PINUP);
@@ -60,6 +66,7 @@ ISR(PCINT2_vect)
 		if (interrupt_time - last_interrupt_time > 200) {
 			if ((PIND_saved & (1 << PINTOGGLE)) == 0)
 			{
+				printOverride = 1;
 				switch (status) {
 					case 0:
 						PORTC &= ~(1 << LEDGREEN);
@@ -77,6 +84,8 @@ ISR(PCINT2_vect)
 					status = 0;
 				}
 
+				radio_status[0] = status;
+
 				switch (status) {
 					case 0:
 						PORTC |= (1 << LEDGREEN);
@@ -87,6 +96,24 @@ ISR(PCINT2_vect)
 					case 2:
 						PORTC |= (1 << LEDRED);
 						break;
+				}
+			}
+
+			if ((PIND_saved & (1 << PINUP)) == 0)
+			{
+				printOverride = 1;
+				user_index += 1;
+				if (user_index >= max_users) {
+					user_index = 0;
+				}
+			}
+
+			if ((PIND_saved & (1 << PINDOWN)) == 0)
+			{
+				printOverride = 1;
+				user_index -= 1;
+				if (user_index < 0) {
+					user_index = max_users - 1;
 				}
 			}
 		}

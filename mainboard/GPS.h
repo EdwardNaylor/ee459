@@ -48,7 +48,8 @@ void gps_init(void);
 bool gps_encode(char c);
 char gps_in(void);
 float distance_between(float lat1, float long1, float lat2, float long2);
-void get_position(float *latitude, float *longitude, unsigned long *fix_age);
+float bearing_between(float lat1, float long1, float lat2, float long2);
+void get_position(float *latitude, float *longitude);
 
 //internal utilities
 int from_hex(char a);

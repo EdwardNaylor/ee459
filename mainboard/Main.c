@@ -16,7 +16,11 @@
 unsigned char buffer[20];
 
 int main(void) {
+	buttons_init();
+
 	sci_init();						// Initialize the SCI port
+
+	radio_init();						// Initialize the radio
 
 	lcd_init();						// Initialize the LCD
 
@@ -28,19 +32,21 @@ int main(void) {
 
 	gps_init();			// Initialize the GPS
 
-	buttons_init();
 
 	// UCSR0B = (1 << RXCIE0) | (1 << RXEN0);
 
 	//enable global interrupts
 	sei();
 
-	while (1) {
-		radio_send_message();
+	float my_lat;
+	float my_lon;
+	float their_lat;
+	float their_lon;
 
-		lcd_clear();
-		sprintf(buffer,"%s", send_str);
-		lcd_out(LCD_LINE_ONE, buffer);	// Print string on line 1
+	float distance;
+	float bearing;
+
+	while (1) {
 		short x, y, z;
 		x = compass_get_x();
 		y = compass_get_y();
@@ -49,8 +55,6 @@ int main(void) {
 		if (check_radio()) {
 			radio_read(); //blocking
 		}
-		sprintf(buffer,"%s %d %ld %ld", radio_name, radio_status, radio_lat, radio_lon);
-		lcd_out(LCD_LINE_TWO, buffer);
 
 		double theta = compass_get_north();
 		int position =  (int) round(theta / 45);
@@ -59,74 +63,113 @@ int main(void) {
 		}
 
 		uint8_t theta_buffer[10];
-		dtostrf(theta, -10, 0, theta_buffer);
-		sprintf(buffer, "%s %s", compass_get_dir(), theta_buffer);
-		lcd_out(LCD_LINE_THREE, buffer);
+		dtostrf(theta, -3, 2, theta_buffer);
 
-		shift_out(~(1 << position), 1 << position);
+		uint8_t red = 0x00;
+		if (user_index != 0) {
+			if (_gps_data_ever_good) {
+				get_position(&my_lat, &my_lon);
+				their_lat = radio_lat[user_index] / 100000.0;
+				their_lon = radio_lon[user_index] / 100000.0;
 
-		if (_gps_data_ever_good) {
-			float lat;
-			float lon;
-			unsigned long age;
-			get_position(&lat, &lon, &age);
-			uint8_t lat_buffer[10];
-			uint8_t lon_buffer[10];
-			dtostrf(lat, -3, 2, lat_buffer);
-			dtostrf(lon, -3, 2, lon_buffer);
-			sprintf(buffer,"%s %s", lat_buffer, lon_buffer);
-			lcd_out(LCD_LINE_FOUR, buffer);
-		} else {
-			sprintf(buffer,"GPS fixing...");
-			lcd_out(LCD_LINE_FOUR, buffer);
-		}
+				distance = distance_between(my_lat, my_lon, their_lat, their_lon);
+				bearing = bearing_between(my_lat, my_lon, their_lat, their_lon);
 
-		int timeout = 0;
-		while (!gps_encode(gps_in())) {
-			if (timeout > 1000) {
-				break;
+				double phi = theta - bearing;
+				if (phi > 360.0) {
+					phi -= 360.0;
+				}
+				if (phi < 0) {
+					phi += 360.0;
+				}
+
+				int phi_int = (int) round(phi / 45);
+				if (phi_int == 8) {
+					phi_int = 0;
+				}
+
+				red = (1 << phi_int);
 			}
-			timeout++;
 		}
 
-		//_delay_ms(250);
+		shift_out(1 << position, red);
+
+		if (printLCD == 0 || printOverride == 1) {
+			radio_send_message();
+
+			lcd_clear();
+
+			char status_string[10];
+			if (radio_status[user_index] == 0) {
+				strcpy(status_string, "ok");
+			} else if (radio_status[user_index] == 1) {
+				strcpy(status_string, "warning");
+			}	else if (radio_status[user_index] == 2) {
+			 strcpy(status_string, "danger");
+		  }
+
+			sprintf(buffer,"%s: %s", radio_name[user_index], status_string);
+			lcd_out(LCD_LINE_ONE, buffer);
+
+			if (user_index == 0) {
+				if (_gps_data_ever_good) {
+					float lat;
+					float lon;
+					get_position(&lat, &lon);
+					uint8_t lat_buffer[10];
+					uint8_t lon_buffer[10];
+					dtostrf(lat, -3, 2, lat_buffer);
+					dtostrf(lon, -3, 2, lon_buffer);
+
+					sprintf(buffer,"%s%c, %s%c %s", lat_buffer, 0xDF, lon_buffer, 0xDF, compass_get_dir(theta));
+					lcd_out(LCD_LINE_TWO, buffer);
+				} else {
+					sprintf(buffer, "%s", theta_buffer);
+					lcd_out(LCD_LINE_TWO, buffer);
+				}
+			} else {
+				if (_gps_data_ever_good) {
+					uint8_t distance_buffer[10];
+					dtostrf(distance, -3, 2, distance_buffer);
+
+					sprintf(buffer,"%sm %s", distance_buffer, compass_get_dir(bearing));
+					lcd_out(LCD_LINE_TWO, buffer);
+				} else {
+					sprintf(buffer, "Need GPS fix");
+					lcd_out(LCD_LINE_TWO, buffer);
+				}
+			}
+
+			if (user_index == 0) {
+				if (_gps_data_ever_good) {
+					sprintf(buffer, "%ld %ld", _time, _date);
+					lcd_out(LCD_LINE_THREE, buffer);
+				} else {
+					// sprintf(buffer,"x:%hd y:%hd z:%hd", x, y, z);
+					// lcd_out(LCD_LINE_THREE, buffer);
+					sprintf(buffer, "Need GPS fix");
+					lcd_out(LCD_LINE_THREE, buffer);
+				}
+			} else {
+				int seconds = (millis() - radio_fix[user_index]) / 1000;
+				sprintf(buffer, "Heard %d s ago", seconds);
+				lcd_out(LCD_LINE_THREE, buffer);
+			}
+
+
+			if (!_gps_data_ever_good) {
+				sprintf(buffer,"GPS fixing...");
+				lcd_out(LCD_LINE_FOUR, buffer);
+			}
+
+			// while (!gps_encode(gps_in())) {};
+
+			printOverride = 0;
+		}
+
+		printLCD++;
+		if (printLCD == 100) {
+			printLCD = 0;
+		}
 	}
-		//
-		// sprintf(buffer,"lat:%ld %d", _latitude, _gps_data_good);
-		// lcd_out(20, buffer);
-		/*char buf[100];
-		unsigned char i = 0;
-		bool flag = false;
-
-		while (1)
-		{
-			char c = gps_in();
-			if(c == '$')
-			{
-				flag = true;
-			}
-			if(flag)
-			{
-				buf[i] = c;
-				i++;
-			}
-			if(i == 20)
-			{
-				buf[19] = '\0';
-				lcd_out(0, buf);
-				i = 0;
-				flag = false;
-			}
-		}
-
-		_delay_ms(50);
-
-		//
-		// shift_out(0xFF, 0xFF);
-		// _delay_ms(500);
-		// shift_out(0x00, 0x00);
-		// _delay_ms(500);
-	}
-
-	return 0;	 /* never reached */
 }

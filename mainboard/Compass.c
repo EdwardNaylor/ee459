@@ -33,10 +33,8 @@ void compass_init(void)
 	i2c_io(0x3C, wbuf + 4, 1, wbuf + 5, 1, NULL, 0);
 }
 
-const char* compass_get_dir()
+const char* compass_get_dir(double degree)
 {
-	double degree = compass_get_north();
-
 	uint8_t direction = (uint8_t) round(degree / 45);
 	if (direction == 8) {
 		direction = 0;
@@ -47,14 +45,44 @@ const char* compass_get_dir()
 
 double compass_get_north()
 {
-	double theta = 180.0 * atan2(-1 * compass_get_y(), compass_get_x()) / M_PI;
+	short z = compass_get_z();
+	short y = compass_get_y();
+	short x = compass_get_x();
+	double theta;
+
+	// if (y > 0) {
+	// 	theta = 90 - atan2(x,y) * 180.0 / M_PI;
+	// } else if (y < 0) {
+	// 	theta = 270 - atan2(x,y) * 180.0 / M_PI;
+	// } else {
+	// 	if (x < 0) {
+	// 		theta = 180.0;
+	// 	} else {
+	// 		theta = 0.0;
+	// 	}
+	// }
+
+	theta = atan2(y,x) * 180 / M_PI;
+	theta -= 12.1;
+
 	if (theta < 0) {
-		theta = 360.0 + theta;
-	} else {
-		// do nothing
+		theta += 360;
 	}
 
+  if(theta > 360)
+    theta -= 360;
+
+
 	return theta;
+	//
+	// double theta = 180.0 * atan2(-1 * compass_get_y(), compass_get_x()) / M_PI;
+	// if (theta < 0) {
+	// 	theta = 360.0 + theta;
+	// } else {
+	// 	// do nothing
+	// }
+	//
+	// return theta;
 }
 
 // It would be better to use a timer interupt rather than writing serial i2c

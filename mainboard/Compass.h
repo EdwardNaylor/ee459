@@ -6,6 +6,6 @@ short compass_get_x(void);
 short compass_get_y(void);
 short compass_get_z(void);
 double compass_get_north(void);
-const char* compass_get_dir(void);
+const char* compass_get_dir(double);
 
 #endif

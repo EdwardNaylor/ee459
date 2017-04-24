@@ -14,12 +14,16 @@ uint8_t get_swtich()
 }
 
 void send_serial(char * text) {
-	char str[80];
+	char str[100];
 	int len = strlen(text);
+	int sum = 0;
+	for (int i = 0; i < len; i++) {
+		sum += text[i];
+	}
 	strcpy(str, text);
-	char lenBuffer[10];
-	itoa(len, lenBuffer, 10);
-	strcat(str, lenBuffer);
+	char sumBuffer[20];
+	sprintf(sumBuffer, "%d", sum);
+	strcat(str, sumBuffer);
 	strcat(str, ";");
 	sci_outs(str);
 }
@@ -48,16 +52,16 @@ int main(void) {
 		switch(get_swtich())
 		{
 			case 1:
-				send_serial("$testA,0,12,12;");
+				send_serial("$Leavy,0,3402166,-11828296;");
 				break;
 			case 2:
-				send_serial("$testB,1,123,345;");
+				send_serial("$Wemes,1,3402098,-11829677;");
 				break;
 			case 4:
-				send_serial("$testC,2,345,456;");
+				send_serial("$Colliseum,2,3401536,-11828830;");
 				break;
 			case 8:
-				send_serial("$testD,3,45,41;");
+				send_serial("$Engemann,0,3402506,-11828882;");
 				break;
 		}
 		_delay_ms(10);
